@@ -40,10 +40,12 @@ function App() {
       style: "mapbox://styles/mapbox/satellite-streets-v11",
       center: [-70.9, 42.35],
       zoom: 9,
+      pitch: 40
     });
 
-    //Draw Controls
+    // Add navigation control (the +/- zoom buttons)
     map.current.addControl(new mapboxgl.NavigationControl(), 'top-right');
+    //Draw Controls Box
     map.current.addControl(Draw, 'top-left');
 
     //Draw Controls Functions
@@ -56,7 +58,7 @@ function App() {
     return () => map.current.remove();
   }, []);
 
-  // Add navigation control (the +/- zoom buttons)
+  
   
 
   
