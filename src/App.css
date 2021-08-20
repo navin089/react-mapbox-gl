@@ -1,7 +1,61 @@
 .App {
   text-align: center;
+  position: relative;
 }
 
 .map-container {
-  height: 600px;
-  }
+  height: 80vh;
+
+}
+
+.app__iconContainer{
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  top: 200px;
+  left: 11px;
+  z-index: 10;
+}
+
+.circle__icon{
+  background-color: white;
+  border-top-left-radius: 4px;
+  border-top-right-radius: 4px;
+  padding: 5.6px;
+  cursor: pointer;
+}
+
+.scissors__icon{
+  background-color: white;
+  border-top: 1px solid lightgrey;
+  padding: 5.6px;
+  cursor: pointer;
+}
+
+.split__icon{
+  background-color: white;
+  border-top: 1px solid lightgrey;
+  padding: 5.6px;
+  cursor: pointer;
+}
+
+.union__icon{
+  background-color: white;
+  padding: 5.6px;
+  cursor: pointer;
+  border-top: 1px solid lightgrey;
+}
+
+.clear__icon{
+  background-color: white;
+  border-bottom-left-radius: 4px;
+  border-bottom-right-radius: 4px;
+  border-top: 1px solid lightgrey;
+  padding: 5.6px;
+  cursor: pointer;
+}
+
+.circle__icon:hover,.scissors__icon:hover, .split__icon:hover, .union__icon:hover, .clear__icon:hover {
+  background-color: rgb(231, 228, 228);
+}
