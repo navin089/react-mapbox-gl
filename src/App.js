@@ -1,4 +1,6 @@
 import React, { useRef, useEffect } from "react";
+import {writeJsonFile} from 'write-json-file';
+// import loadJsonFile  from 'load-json-file';
 import mapboxgl from "mapbox-gl"; // eslint-disable-line import/no-webpack-loader-syntax
 import MapboxDraw from "@mapbox/mapbox-gl-draw";
 import SplitPolygonMode from "mapbox-gl-draw-split-polygon-mode";
@@ -25,12 +27,32 @@ import {
 import ReactTooltip from "react-tooltip";
 import "./App.css";
 import Data from "./field_boundary_has_hole.json"; //shape file data
-import { circle } from '@turf/turf';
-import lineclip from 'lineclip'; // polygon-clipping
+import { polygon, point, booleanPointInPolygon, bbox } from '@turf/turf';
+import lineclip from 'lineclip';
 
-// console.warn("Poly-Clipping Output : ", lineclip.polygon(
-//   [[1, 2], [1, 7], [5, 7], [5, 2]], // line
-//   [[3, 5], [3, 9], [6, 9], [6, 5]]));
+var pts = point([5, 3.5]);
+var pollly = polygon([[
+  [1, 1],
+  [1, 3.5],
+  [4, 3.5],
+  [4, 1],
+  [1, 1]
+]]);
+
+// console.log("BBox of polygon : ", bbox(pollly))
+
+// console.log("Point and Polygon :",pollly, pts);
+console.log("Is Point lies in polygon ?", booleanPointInPolygon(point([5, 3.5]), pollly))
+
+var xindex = lineclip.polygon([
+  [3, 3],
+  [3, 5],
+  [5, 5],
+  [5, 3],
+  [3, 3]
+] ,bbox(pollly));
+
+console.log("Clippped Polygon : ", xindex);
 
 
 mapboxgl.accessToken =
@@ -383,44 +405,6 @@ function App() {
     console.log("Drawn Data: ", data.features);
   }
 
-  ///polygon cut feature
-  function handlePolygonCut() {
-    const cut_poly1 = [];
-    const cut_poly2 = [];
-    //var combine_poly=[];
-    if (all_poly.length === 0) {
-      alert("Try selecting polygons");
-      return false;
-    }
-    var split_output = [];
-    if (all_poly.length <= 2) {
-      cut_poly1.push(all_poly[0].geometry.coordinates[0]);
-      cut_poly2.push(all_poly[1].geometry.coordinates[0]);
-      split_output = polygonClipping.difference(cut_poly1, cut_poly2);
-      console.log("Split O/P: ", split_output);
-
-      if (split_output.length === 1) {
-        Draw.delete(all_poly[0].id);
-        Draw.delete(all_poly[1].id);
-
-        Draw.add({
-          id: "poly-3355567",
-          type: "Feature",
-          properties: {},
-          geometry: {
-            type: "Polygon",
-            coordinates: split_output[0],
-          },
-        });
-      } else {
-        alert("Split failed!!");
-      }
-    } else {
-      alert("Split failed, try selecting polygon!!");
-    }
-    // all_poly=[];
-    all_poly.length = 0;
-  }
 
   function handleMerge() {
     const poly1 = [];
@@ -525,143 +509,127 @@ function App() {
     }
   }
 
-  var geoJSON = {
-    type: "FeatureCollection",
-    features: [
-      {
+
+  const handleMakeCircleHole = () =>{
+    // alert("Circle hole is made");
+    console.log("First from Multipolygon : ", all_poly[0].id);
+    console.log("Second selection : ", all_poly[1].id);
+
+    if(all_poly[0].geometry.type === "MultiPolygon"){
+
+      all_poly[0].geometry.coordinates[0].push(all_poly[1].geometry.coordinates[0]);
+
+   
+    Draw.add({
+      type: "Feature",
+      properties: {
+      },
+      geometry: {
+        type: "MultiPolygon",
+        coordinates: [
+            all_poly[0].geometry.coordinates[0]
+        ],
+      },
+    });
+    Draw.delete(all_poly[0].id);
+    Draw.delete(all_poly[1].id);
+  
+    }
+    if(all_poly[0].geometry.type === "Polygon"){
+      // console.log("First from polygon :", all_poly[0].geometry.coordinates)
+      // console.log("Second from polygon :", all_poly[1].geometry.coordinates)
+      let final_mul = [];
+      final_mul.push(all_poly[0].geometry.coordinates[0]);
+      final_mul.push(all_poly[1].geometry.coordinates[0]);
+
+      Draw.add({
+        id: 990011,
         type: "Feature",
         properties: {
-          class_id: 1,
         },
         geometry: {
           type: "MultiPolygon",
           coordinates: [
-            [
-              [
-                [-94.90362874880041, 41.07845813934523],
-                [-89.96347360931735, 41.24151786613507],
-                [-89.63344236826659, 38.913887589263084],
-                [-94.87268831995179, 38.567982111611485],
-                [-94.90362874880041, 41.07845813934523]
-              ],
-
-              [
-                [-93.91353502564723, 40.89940363505775],
-                [-94.6251648891636, 40.312156270902705],
-                [-92.09836319986692, 40.2413437305822],
-                [-93.91353502564723, 40.89940363505775]
-              ],
-
-              [
-                [-91.05739089251821, 40.062861428141076],
-                [-91.12258562528538, 40.06039192895756],
-                [-91.187138519926, 40.053007747964074],
-                [-91.25041447457211, 40.040781579292556],
-                [-91.31179177208251, 40.02383373138884],
-                [-91.37066855479998, 40.002330866025815],
-                [-91.42646904334828, 39.97648425600871],
-                [-91.47864942255075, 39.946547584058216],
-                [-91.5267033243484, 39.912814310951134],
-                [-91.57016684561074, 39.875614646012004],
-                [-91.60862304768627, 39.83531215740389],
-                [-91.6417058941338, 39.79230006330086],
-                [-91.6691035930028, 39.74699724790706],
-                [-91.69056131999838, 39.699844048405],
-                [-91.70588330859852, 39.651297860283364],
-                [-91.71493430244819, 39.60182860914231],
-                [-91.71764037393544, 39.55191413705047],
-                [-91.71398912060519, 39.50203555089624],
-                [-91.7040292578757, 39.452672579003305],
-                [-91.68786963233366, 39.40429898064564],
-                [-91.6656776846743, 39.35737805107657],
-                [-91.63767739514813, 39.312358262354344],
-                [-91.60414674722772, 39.26966907767825],
-                [-91.56541474719877, 39.229716974205765],
-                [-91.52185803860944, 39.19288170646464],
-                [-91.47389715109443, 39.15951283955029],
-                [-91.42199242314547, 39.129926578350236],
-                [-91.36663963804833, 39.104402916095346],
-                [-91.3083654115674, 39.08318312262347],
-                [-91.24772236914144, 39.066467589872296],
-                [-91.18528414945894, 39.05441404930003],
-                [-91.12164027039806, 39.047136173169484],
-                [-91.05739089251821, 39.04470256891832],
-                [-90.99314151463837, 39.047136173169484],
-                [-90.92949763557749, 39.05441404930003],
-                [-90.86705941589499, 39.066467589872296],
-                [-90.80641637346905, 39.08318312262347],
-                [-90.74814214698812, 39.104402916095346],
-                [-90.69278936189096, 39.129926578350236],
-                [-90.64088463394201, 39.15951283955029],
-                [-90.592923746427, 39.19288170646464],
-                [-90.54936703783767, 39.229716974205765],
-                [-90.51063503780873, 39.26966907767825],
-                [-90.47710438988831, 39.312358262354344],
-                [-90.44910410036213, 39.35737805107657],
-                [-90.42691215270277, 39.40429898064564],
-                [-90.41075252716072, 39.45267257900329],
-                [-90.40079266443125, 39.50203555089624],
-                [-90.397141411101, 39.55191413705047],
-                [-90.39984748258826, 39.60182860914231],
-                [-90.40889847643793, 39.651297860283364],
-                [-90.42422046503806, 39.699844048405],
-                [-90.44567819203363, 39.74699724790706],
-                [-90.47307589090262, 39.79230006330086],
-                [-90.50615873735015, 39.83531215740389],
-                [-90.5446149394257, 39.875614646012004],
-                [-90.58807846068804, 39.912814310951134],
-                [-90.6361323624857, 39.946547584058216],
-                [-90.68831274168816, 39.97648425600871],
-                [-90.74411323023645, 40.002330866025815],
-                [-90.8029900129539, 40.02383373138884],
-                [-90.8643673104643, 40.040781579292556],
-                [-90.92764326511043, 40.053007747964074],
-                [-90.99219615975106, 40.06039192895756],
-                [-91.05739089251821, 40.062861428141076]
-
-              ]
-            ],
+            final_mul
           ],
         },
-      },
-    ],
-  };
-
-  const handleMakeCircle = () =>{
-    
-  }
-
-
-
-  {/* Activate the stamp mode with a base feature collection that should be stamped/split with a hand drawn polygon */}
-
-  const handleStampMode = () =>{
-    try {
-      // Provide the default radius as an option to CircleMode
-      Draw.changeMode("stamp", {
-        baseFeatureCollection: geoJSON
       });
-     
-    } catch (err) {
-      alert(err.message);
-      console.error(err);
+      Draw.delete(all_poly[0].id);
+      Draw.delete(all_poly[1].id);
+      // console.log("Final multipolygon from polygon : ", final_mul);
     }
   }
 
-  const handleTransferMode = () =>{
-    try {
-      // Provide the default radius as an option to CircleMode
-      var featureIds = Draw.set(geoJSON);
-      Draw.changeMode('transform', {
-          featureIds: featureIds,
-});
-    } catch (err) {
-      alert(err.message);
-      console.error(err);
-    }
-  }
-        
+  //partial hole in polygon mode function
+  const handlePartialHoleMode = () =>{
+    // alert("Polygon with partial hole..");
 
+    //1.select both polygons
+    //2.calculate intersecting polygon's coordinates
+    //3.perform 'polygon with hole' with main polygon and
+    //intersected polygon
+    // console.log("Selected Polygon In hole : ", all_poly[0]);
+    // console.log("BBox of Polygon 1 : ", bbox(all_poly[0]));
+    // console.log("Second Polygons only coords : ", all_poly[1].geometry.coordinates[0])
+    var interesected_poly = lineclip.polygon(all_poly[1].geometry.coordinates[0], bbox(all_poly[0]));
+    console.log("The End Output : ", interesected_poly);
+
+    if(all_poly.length === 2){
+    var echo_poly1 = []
+    var echo_poly2 = []
+    var echo_output = []
+    var overall_coords = []
+    echo_poly1.push(all_poly[0].geometry.coordinates[0]);
+    echo_poly2.push(all_poly[1].geometry.coordinates[0]);
+    echo_output = polygonClipping.intersection(echo_poly1, echo_poly2);
+
+    if(all_poly[0].geometry.type === "Polygon"){
+    
+    // Draw.delete(all_poly[1].id);
+    // console.log("Experimental Output : ",echo_output);
+    overall_coords.push(all_poly[0].geometry.coordinates[0]);
+    overall_coords.push(echo_output[0][0]);
+    console.log("Multipolygon Output : ",overall_coords);
+    Draw.delete(all_poly[0].id);
+    Draw.delete(all_poly[1].id);
+    
+    Draw.add({
+      type: 'Feature',
+      properties: {},
+      geometry: { 
+        type: 'MultiPolygon', 
+        coordinates: [
+          overall_coords
+        ] 
+      }
+    })
+  }
+
+  if(all_poly[0].geometry.type === "MultiPolygon"){
+
+    all_poly[0].geometry.coordinates[0].push(echo_output[0][0]);
+      
+    Draw.add({
+      type: "Feature",
+      properties: {
+      },
+      geometry: {
+        type: "MultiPolygon",
+        coordinates: [
+            all_poly[0].geometry.coordinates[0]
+        ],
+      },
+    });
+
+    Draw.delete(all_poly[0].id);
+    Draw.delete(all_poly[1].id);
+  }
+
+  }else{
+    alert("Polygon cut failed, try selecting 2 two polygons")
+  }
+
+  }
 
 
   useEffect(() => {
@@ -677,14 +645,14 @@ function App() {
     });
 
 
-
     // Add navigation control (the +/- zoom buttons)
     map.current.addControl(new mapboxgl.NavigationControl(), "bottom-right");
     //Draw Controls Box
     map.current.addControl(Draw, "top-left");
 
     map.current.on("load", () =>{
-      Draw.set(geoJSON);
+      //things to load
+
     });
 
    
@@ -703,6 +671,12 @@ function App() {
     all_poly = [];
     // console.log("Selection cleared...", all_poly);
   };
+
+
+  const handleSaveZones = async () => {
+      var savedData = await writeJsonFile('foo.json', {foo: true});
+      console.log("Saved Zones : ", savedData);
+  }
 
  
 
@@ -766,7 +740,8 @@ function App() {
           color="black"
           className="split__icon"
           size={17}
-          onClick={handlePolygonCut}
+          // onClick={handlePolygonCut}
+          onClick={handleMakeCircleHole}
           data-tip data-for="holeTip"
         />
 
@@ -787,12 +762,9 @@ function App() {
         />
 
       </div>
+        <button onClick={handlePartialHoleMode}>Partial Hole mode</button>
 
-      {/* <button onClick={handleCutBoundary}>Cut Boundary</button> */}
-      {/* <button onClick={handleStampMode}>Stamp Mode</button>
-      <button onClick={handleTransferMode}>Transfer Mode</button> */}
-      <button onClick={handleMakeCircle}>Make Hole as Circle</button>
-
+        <button onClick={handleSaveZones}>Save Zones</button>
     </div>
   );
 }

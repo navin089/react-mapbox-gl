@@ -9,8 +9,10 @@
     "@testing-library/react": "^11.2.7",
     "@testing-library/user-event": "^12.8.3",
     "@turf/area": "^6.5.0",
+    "@turf/boolean-point-in-polygon": "^6.5.0",
     "@turf/turf": "^6.5.0",
     "lineclip": "^1.1.5",
+    "load-json-file": "^6.2.0",
     "mapbox-gl": "^2.3.1",
     "mapbox-gl-draw-circle": "^1.1.2",
     "mapbox-gl-draw-cut-polygon-mode": "^1.0.1",
@@ -25,7 +27,8 @@
     "react-scripts": "4.0.3",
     "react-tooltip": "^4.2.21",
     "string-array": "^1.0.1",
-    "web-vitals": "^1.1.2"
+    "web-vitals": "^1.1.2",
+    "write-json-file": "^5.0.0"
   },
   "scripts": {
     "start": "react-scripts start",
